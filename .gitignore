@@ -1,0 +1,45 @@
+.structure.ps1
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.o
+*.obj
+
+# Linker files
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared libraries
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+build/
+bin/
+
+# IDE Specific Files (VS Code, Visual Studio, CLion)
+.vscode/
+.vs/
+cmake-build-debug/
+cmake-build-release/
+*.user
+*.suo
+
+.structure.ps1

@@ -27,4 +27,3 @@ A production-grade, Obj-O C++ application designed to :
    cd cgpa-calculator
    ```
 2. Build the project (Instructions will be updated upon `Main.cpp` completion).
- 
