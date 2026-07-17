@@ -43,3 +43,4 @@ cmake-build-release/
 *.suo
 
 .structure.ps1
+.github-setup.md
