@@ -1,4 +1,4 @@
-#include "include/Course.hpp"
+#include "Course.hpp"
 #include <iostream>
 #include <cassert>
 
@@ -18,7 +18,7 @@ void test_grade_mappings() {
     assert(c3.getLetterGrade() == "F");
     assert(c3.getGradePoints() == 0.0);
 
-    std::cout << "✅ All Course unit tests passed successfully!\n";
+    std::cout << "All Course unit tests passed successfully!\n";
 }
 
 int main() {
