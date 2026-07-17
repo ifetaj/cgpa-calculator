@@ -24,5 +24,6 @@ public:
     // Logic Methods
     void addCourse(const Course& course);
     double calculateGPA() const;
+};
 
 #endif // SEMESTER_HPP
