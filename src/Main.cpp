@@ -4,37 +4,55 @@
 #include "Student.hpp"
 #include "Semester.hpp"
 #include "Course.hpp"
+#include "StorageManager.hpp"
 
-// Utility helper to safely clear input stream errors (Enterprise Input Resilience)
 void clearInputBuffer() {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
-// Visual interface component: Display Menu Options
 void displayMenu() {
-    std::cout << "\n====================================\n";
-    std::cout << "              CGPA CALCULATOR        \n";
-    std::cout << "====================================\n";
+    std::cout << "\n========================================================\n";
+    std::cout << "==   ##########      CGPA CALCULATOR     ###########  ==\n";
+    std::cout << "========================================================\n";
     std::cout << "1. Add a Semester\n";
     std::cout << "2. Add a Course to a Semester\n";
     std::cout << "3. View Academic Report & GPA/CGPA\n";
-    std::cout << "4. Exit Application\n";
-    std::cout << "Select an option (1-4): ";
+    std::cout << "4. Save Academic Profile to File\n";
+    std::cout << "5. Load Academic Profile from File\n";
+    std::cout << "6. Exit Application\n";
+    std::cout << "Select an option (1-6): ";
 }
 
 int main() {
-    std::cout << "Welcome to the Academic Management Console.\n";
-    std::string firstName, lastName;
+    std::cout << "##### Welcome to the Academic Management Console. #####\n";
+    Student student("Default", "Student");
     
-    std::cout << "Enter student first name: ";
-    std::cin >> firstName;
-    std::cout << "Enter student last name: ";
-    std::cin >> lastName;
+    std::cout << "-----Initialize a new profile or load an existing one?\n";
+    std::cout << "-----1. Create New Profile\n-----2. Load from File\n-----3. Exit\nChoice: ";
+    int initChoice;
+    std::cin >> initChoice;
     clearInputBuffer();
 
-    // Initialize core tracking object
-    Student student(firstName, lastName);
+    if (initChoice == 2) {
+        std::string filename;
+        std::cout << "Enter filename to load (e.g., transcript.txt): ";
+        std::cin >> filename;
+        if (StorageManager::loadProfile(filename, student)) {
+            std::cout << " Profile successfully loaded for " << student.getFirstName() << " " << student.getLastName() << "\n";
+        } else {
+            std::cout << " Failed to load file. Initializing blank profile instead.\n";
+        }
+    } else {
+        std::string firstName, lastName;
+        std::cout << "Enter student first name: ";
+        std::cin >> firstName;
+        std::cout << "Enter student last name: ";
+        std::cin >> lastName;
+        student.setFirstName(firstName);
+        student.setLastName(lastName);
+        clearInputBuffer();
+    }
     
     bool running = true;
     while (running) {
@@ -42,8 +60,8 @@ int main() {
         int choice;
         std::cin >> choice;
 
-        if (std::cin.fail() || choice < 1 || choice > 4) {
-            std::cout << "Invalid choice! Please enter a number between 1 and 4.\n";
+        if (std::cin.fail() || choice < 1 || choice > 6) {
+            std::cout << " Invalid choice! Please enter a number between 1 and 6.\n";
             clearInputBuffer();
             continue;
         }
@@ -51,29 +69,29 @@ int main() {
         switch (choice) {
             case 1: {
                 std::string semCode;
-                std::cout << "Enter Semester Code (e.g., Fall2026, Spring2027): ";
+                std::cout << "Enter Semester Code (e.g., Fall2026): ";
                 std::cin >> semCode;
                 student.addSemester(Semester(semCode));
-                std::cout << "Semester '" << semCode << "' successfully added.\n";
+                std::cout << " Semester '" << semCode << "' added.\n";
                 break;
             }
             case 2: {
+                // Workaround to bypass const vector access safely inside Main interface context
                 auto& semesters = const_cast<std::vector<Semester>&>(student.getSemesters());
                 if (semesters.empty()) {
-                    std::cout << "Error: Create a semester first before adding courses.\n";
+                    std::cout << " Error: Create a semester first.\n";
                     break;
                 }
 
-                std::cout << "Select semester to add course to:\n";
+                std::cout << "Select semester:\n";
                 for (size_t i = 0; i < semesters.size(); ++i) {
                     std::cout << i + 1 << ". " << semesters[i].getSemesterCode() << "\n";
                 }
-                std::cout << "Choice: ";
                 size_t semChoice;
                 std::cin >> semChoice;
 
                 if (std::cin.fail() || semChoice < 1 || semChoice > semesters.size()) {
-                    std::cout << "Invalid selection.\n";
+                    std::cout << " Invalid selection.\n";
                     clearInputBuffer();
                     break;
                 }
@@ -82,7 +100,7 @@ int main() {
                 int credits;
                 double grade;
 
-                std::cout << "Enter Course Code (e.g., CS101): ";
+                std::cout << "Enter Course Code: ";
                 std::cin >> code;
                 std::cout << "Enter Credits (1-5): ";
                 std::cin >> credits;
@@ -90,22 +108,22 @@ int main() {
                 std::cin >> grade;
 
                 if (std::cin.fail() || grade < 0 || grade > 100 || credits < 1) {
-                    std::cout << "Invalid course inputs. Data discarded.\n";
+                    std::cout << " Invalid course inputs. Data discarded.\n";
                     clearInputBuffer();
                     break;
                 }
 
                 semesters[semChoice - 1].addCourse(Course(code, credits, grade));
-                std::cout << "Course added successfully!\n";
+                std::cout << " Course added successfully!\n";
                 break;
             }
             case 3: {
                 std::cout << "\n====================================\n";
-                std::cout << "🎓 ACADEMIC TRANSCRIPT: " << student.getFirstName() << " " << student.getLastName() << "\n";
+                std::cout << " ACADEMIC TRANSCRIPT: " << student.getFirstName() << " " << student.getLastName() << "\n";
                 std::cout << "====================================\n";
 
                 if (student.getSemesters().empty()) {
-                    std::cout << "No academic history available.\n";
+                    std::cout << "No academic history found.\n";
                     break;
                 }
 
@@ -124,8 +142,33 @@ int main() {
                 std::cout << " Cumulative CGPA: " << student.calculateCGPA() << "\n";
                 break;
             }
-            case 4:
-                std::cout << "Thank you for using Enterprise Academic Systems. Exiting...\n";
+            case 4: {
+                std::string filename;
+                std::cout << "Enter filename to save data (e.g., transcript.txt): ";
+                std::cin >> filename;
+                if (StorageManager::saveProfile(filename, student)) {
+                    std::cout << " Profile successfully saved to " << filename << "\n";
+                } else {
+                    std::cout << " Error writing to file.\n";
+                }
+                break;
+            }
+            case 5: {
+                std::string filename;
+                std::cout << "Enter filename to load: ";
+                std::cin >> filename;
+                // Create a temporary blank student to fill up cleanly
+                Student tempStudent("Temp", "User");
+                if (StorageManager::loadProfile(filename, tempStudent)) {
+                    student = tempStudent; // Safe assignment override
+                    std::cout << " Profile loaded successfully from " << filename << "\n";
+                } else {
+                    std::cout << " Failed to open file.\n";
+                }
+                break;
+            }
+            case 6:
+                std::cout << "Exiting application. Goodbye.\n";
                 running = false;
                 break;
         }
